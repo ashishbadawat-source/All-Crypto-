@@ -85,6 +85,6 @@ export interface User {
   lastLoginAt: number;
 }
 
-export type AuthMode = 'login' | 'register' | 'mnemonic_login' | 'forgot_password';
+export type AuthMode = 'login' | 'register' | 'mnemonic_login' | 'saved_accounts' | 'forgot_password';
 
 export type Language = 'hi' | 'en';

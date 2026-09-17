@@ -1,4 +1,4 @@
-import { AssetConfig, AssetType, Wallet, Transaction } from '../types';
+import { AssetConfig, AssetType, Wallet, Transaction, User } from '../types';
 
 export const ASSET_CONFIGS: Record<AssetType, AssetConfig> = {
   BTC: {
@@ -185,13 +185,25 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   }
 ];
 
-export const DEFAULT_DEMO_USERS = [
+export const DEFAULT_DEMO_USERS: User[] = [
   {
-    id: 'user-demo-1',
-    name: 'Crypto Trader (Demo)',
-    email: 'demo@flashcrypto.sandbox',
+    id: 'user-ashish',
+    name: 'Ashish Badawat',
+    email: 'ashishbadawat@gmail.com',
     pin: '1234',
     mnemonic: 'orbit galaxy quantum matrix nebula cipher crystal rocket vector echo phantom beacon',
+    kycTier: 3,
+    is2FAEnabled: true,
+    avatarSeed: 'ashish',
+    createdAt: Date.now() - 3600000 * 24 * 30,
+    lastLoginAt: Date.now()
+  },
+  {
+    id: 'user-demo-1',
+    name: 'Crypto Trader (Pro)',
+    email: 'trader@flashcrypto.sandbox',
+    pin: '8888',
+    mnemonic: 'genesis apex zenith pulse neutron aurora hyper crypto shadow stellar binary plasma',
     kycTier: 2,
     is2FAEnabled: true,
     avatarSeed: 'crypto_trader',

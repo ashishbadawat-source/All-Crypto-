@@ -16,7 +16,7 @@ import {
   Layers,
   Box
 } from 'lucide-react';
-import { Language, AssetType, Wallet, Transaction, User } from './types';
+import { Language, AssetType, Wallet, Transaction, User, AuthMode } from './types';
 import { INITIAL_WALLETS, INITIAL_TRANSACTIONS, ASSET_CONFIGS, DEFAULT_DEMO_USERS } from './data/constants';
 import { translations } from './data/translations';
 import { Header } from './components/Header';
@@ -54,6 +54,7 @@ export default function App() {
     return DEFAULT_DEMO_USERS[0];
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authModalMode, setAuthModalMode] = useState<AuthMode>('login');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
 
   // Web3 Connection State
@@ -399,7 +400,10 @@ export default function App() {
         simulatedDays={simulatedDays}
         onReset={handleResetSandbox}
         currentUser={currentUser}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAuth={(mode) => {
+          setAuthModalMode(mode || 'login');
+          setIsAuthModalOpen(true);
+        }}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         connectedWeb3Wallet={connectedWeb3Wallet}
         onOpenWeb3Connect={() => setIsWeb3ModalOpen(true)}
@@ -670,16 +674,17 @@ export default function App() {
         onConnectWallet={handleConnectWeb3}
       />
 
-      {/* Authentication Modal (Register / Login / Seed Phrase) */}
+      {/* Authentication Modal (Register / Login / Seed Phrase / Switch Users) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         language={language}
+        initialMode={authModalMode}
         onClose={() => setIsAuthModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
         isDismissable={true}
       />
 
-      {/* User Profile & Security Modal */}
+      {/* User Profile, Security & Account Management Modal */}
       {currentUser && isProfileModalOpen && (
         <UserProfileModal
           user={currentUser}
@@ -687,6 +692,10 @@ export default function App() {
           onClose={() => setIsProfileModalOpen(false)}
           onLogout={handleLogout}
           onUpdateUser={handleUpdateUser}
+          onOpenSwitchAccount={() => {
+            setAuthModalMode('saved_accounts');
+            setIsAuthModalOpen(true);
+          }}
         />
       )}
 

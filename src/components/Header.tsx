@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShieldCheck, Globe, RefreshCw, Zap, Clock, Activity, User as UserIcon, LogIn, CheckCircle2, Wallet } from 'lucide-react';
-import { Language, User } from '../types';
+import { ShieldCheck, Globe, RefreshCw, Zap, Clock, Activity, User as UserIcon, LogIn, UserPlus, CheckCircle2, Wallet, Users } from 'lucide-react';
+import { Language, User, AuthMode } from '../types';
 import { translations } from '../data/translations';
 
 interface HeaderProps {
@@ -10,7 +10,7 @@ interface HeaderProps {
   simulatedDays: number;
   onReset: () => void;
   currentUser: User | null;
-  onOpenAuth: () => void;
+  onOpenAuth: (initialMode?: AuthMode) => void;
   onOpenProfile: () => void;
   connectedWeb3Wallet: string | null;
   onOpenWeb3Connect: () => void;
@@ -92,28 +92,44 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </button>
 
-          {/* User Auth Profile / Login Button */}
+          {/* User Auth Profile & Registration Buttons */}
           {currentUser ? (
-            <button
-              id="user-profile-btn"
-              onClick={onOpenProfile}
-              className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold shadow-sm transition"
-            >
-              <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 text-[10px] font-bold flex items-center justify-center uppercase">
-                {currentUser.name.slice(0, 1)}
-              </div>
-              <span className="truncate max-w-[90px] sm:max-w-[120px] text-[11px]">{currentUser.name}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                id="user-profile-btn"
+                onClick={onOpenProfile}
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold shadow-sm transition"
+              >
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 text-[10px] font-bold flex items-center justify-center uppercase">
+                  {currentUser.name.slice(0, 1)}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="truncate max-w-[90px] sm:max-w-[120px] text-[11px] font-bold">{currentUser.name}</span>
+                  <span className="text-[9px] text-emerald-400 font-mono">Tier-{currentUser.kycTier || 2} KYC</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              </button>
+            </div>
           ) : (
-            <button
-              id="login-register-btn"
-              onClick={onOpenAuth}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 text-xs font-bold rounded-xl shadow-md transition"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>{language === 'hi' ? 'लॉगिन' : 'Login'}</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                id="header-login-btn"
+                onClick={() => onOpenAuth('login')}
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl transition"
+              >
+                <LogIn className="w-3.5 h-3.5 text-amber-400" />
+                <span>{language === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
+              </button>
+
+              <button
+                id="header-register-btn"
+                onClick={() => onOpenAuth('register')}
+                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 text-xs font-bold rounded-xl shadow-md transition"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>{language === 'hi' ? 'रजिस्टर' : 'Register'}</span>
+              </button>
+            </div>
           )}
 
           {/* Language Switcher */}

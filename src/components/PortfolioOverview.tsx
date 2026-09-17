@@ -72,8 +72,8 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               <h3 className="font-bold text-red-100 text-base">{t.expiredNotice}</h3>
               <p className="text-xs text-red-300/80">
                 {language === 'hi'
-                  ? '200 दिनों की समय सीमा समाप्त हो गई है। टाइम-लॉक प्रोटोकॉल के अनुसार सभी फ्लैश टोकन गायब हो चुके हैं।'
-                  : 'The 200-day validity window has elapsed. As per time-lock protocol, simulated assets have been pruned from active ledger state.'}
+                  ? '300 दिनों की समय सीमा समाप्त हो गई है। टाइम-लॉक प्रोटोकॉल के अनुसार सभी फ्लैश टोकन गायब हो चुके हैं।'
+                  : 'The 300-day validity window has elapsed. As per time-lock protocol, simulated assets have been pruned from active ledger state.'}
               </p>
             </div>
           </div>
