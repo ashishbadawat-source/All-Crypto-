@@ -566,6 +566,7 @@ export default function App() {
               selectedWalletId={selectedWalletId}
               language={language}
               onSendTransaction={handleSendTransaction}
+              onQuickMintAsset={handleMintAsset}
               onViewReceipt={(tx: any) => setActiveReceiptTx(tx)}
               onNavigateTab={setActiveTab}
             />

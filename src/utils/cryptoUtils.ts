@@ -48,31 +48,29 @@ export function generateTxid(): string {
  */
 export function validateAddress(address: string, assetType: AssetType): { isValid: boolean; message?: string } {
   if (!address || address.trim().length === 0) {
-    return { isValid: false, message: 'Address cannot be empty' };
+    return { isValid: false, message: 'Address cannot be empty / एड्रेस खाली नहीं हो सकता' };
   }
   const clean = address.trim();
 
   if (assetType === 'BTC') {
-    if (clean.startsWith('bc1') || clean.startsWith('1') || clean.startsWith('3')) {
-      if (clean.length >= 26 && clean.length <= 62) {
-        return { isValid: true };
-      }
+    if (clean.startsWith('bc1') || clean.startsWith('tb1') || clean.startsWith('1') || clean.startsWith('3') || clean.length >= 26) {
+      return { isValid: true };
     }
-    return { isValid: false, message: 'Invalid Bitcoin address format (should start with bc1, 1, or 3)' };
+    return { isValid: false, message: 'Invalid Bitcoin address format (Bitcoin address should start with bc1, 1, 3, or tb1)' };
   }
 
   if (assetType === 'USDT_TRC20' || assetType === 'TRX') {
-    if (clean.startsWith('T') && clean.length === 34) {
+    if (clean.startsWith('T') || clean.startsWith('t') || clean.length >= 20) {
       return { isValid: true };
     }
-    return { isValid: false, message: 'Invalid TRON address (must start with T and be 34 characters)' };
+    return { isValid: false, message: 'Invalid TRON address (TRON TRC-20 address should start with T)' };
   }
 
   if (assetType === 'ETH') {
-    if (clean.startsWith('0x') && clean.length === 42) {
+    if (clean.startsWith('0x') || clean.startsWith('0X') || clean.length >= 20) {
       return { isValid: true };
     }
-    return { isValid: false, message: 'Invalid Ethereum address (must start with 0x and be 42 characters)' };
+    return { isValid: false, message: 'Invalid Ethereum address (ETH address should start with 0x)' };
   }
 
   return { isValid: true };
@@ -138,7 +136,7 @@ export function calculateRemainingTime(expiresAt: number, simulatedDaysOffset: n
 /**
  * Web Audio sound feedback
  */
-export function playAudioFeedback(type: 'click' | 'success' | 'broadcast' | 'expire') {
+export function playAudioFeedback(type: 'click' | 'success' | 'broadcast' | 'expire' | 'error') {
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
@@ -163,6 +161,14 @@ export function playAudioFeedback(type: 'click' | 'success' | 'broadcast' | 'exp
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
+    } else if (type === 'error') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.setValueAtTime(200, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
     } else if (type === 'broadcast') {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(320, ctx.currentTime);

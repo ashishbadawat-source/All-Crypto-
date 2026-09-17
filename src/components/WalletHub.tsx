@@ -195,13 +195,27 @@ export const WalletHub: React.FC<WalletHubProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={() => onNavigateTab('transfer')}
-                className="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg text-xs font-semibold transition flex items-center gap-1.5"
+                onClick={() => {
+                  onSelectWallet(selectedWallet.id);
+                  onNavigateTab('transfer');
+                }}
+                className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
               >
-                <ArrowDownLeft className="w-3.5 h-3.5" />
-                <span>{language === 'hi' ? 'इस वॉलेट में भेजें' : 'Send to this Wallet'}</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>{language === 'hi' ? 'ट्रांसफर भेजें (Send)' : 'Send Transfer'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onSelectWallet(selectedWallet.id);
+                  onNavigateTab('generator');
+                }}
+                className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-semibold transition flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5 text-amber-400" />
+                <span>{language === 'hi' ? 'बैलेंस माइन करें (Mine)' : 'Mine Assets'}</span>
               </button>
             </div>
           </div>
