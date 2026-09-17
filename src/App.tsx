@@ -70,7 +70,37 @@ export default function App() {
   const [wallets, setWallets] = useState<Wallet[]>(() => {
     const saved = localStorage.getItem('flash_crypto_wallets');
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* no-op */ }
+      try {
+        const parsed: Wallet[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Normalize and merge to guarantee Binance and latest vaults exist
+          const merged = parsed.map(w => {
+            if (w.id === 'wallet-receiver-2') {
+              return {
+                ...w,
+                id: 'wallet-binance',
+                name: 'Binance Exchange (Spot & Funding Vault)',
+                nameHi: 'बाइनेंस एक्सचेंज खाता (स्पॉट एवं फंडिंग)',
+                balances: {
+                  BTC: w.balances?.BTC || 1.50,
+                  USDT_TRC20: w.balances?.USDT_TRC20 || 35000,
+                  TRX: w.balances?.TRX || 120000,
+                  ETH: w.balances?.ETH || 6.5
+                }
+              };
+            }
+            return w;
+          });
+
+          INITIAL_WALLETS.forEach(initW => {
+            const hasWallet = merged.some(w => w.id === initW.id || (initW.id === 'wallet-binance' && w.id === 'wallet-receiver-2'));
+            if (!hasWallet) {
+              merged.push(initW);
+            }
+          });
+          return merged;
+        }
+      } catch { /* no-op */ }
     }
     return INITIAL_WALLETS;
   });
@@ -208,8 +238,26 @@ export default function App() {
     fee: number,
     toWalletId?: string
   ) => {
-    setWallets(prev =>
-      prev.map(w => {
+    setWallets(prev => {
+      // Find matching target wallet either by ID or by address or Binance keyword
+      let resolvedToWalletId = toWalletId;
+      if (!resolvedToWalletId) {
+        const found = prev.find(
+          w => w.addressBtc === toAddress || w.addressTron === toAddress || w.addressEth === toAddress
+        );
+        if (found) {
+          resolvedToWalletId = found.id;
+        } else if (
+          toAddress === '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' ||
+          toAddress === 'TLyqzVGLV1srkB7dToTAwdg296WC972c9y' ||
+          toAddress === '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8' ||
+          toAddress.toLowerCase().includes('binance')
+        ) {
+          resolvedToWalletId = 'wallet-binance';
+        }
+      }
+
+      return prev.map(w => {
         if (w.id === fromWalletId) {
           const currentBal = w.balances[assetType] || 0;
           return {
@@ -220,7 +268,14 @@ export default function App() {
             }
           };
         }
-        if (toWalletId && w.id === toWalletId) {
+
+        const isTarget =
+          (resolvedToWalletId && (w.id === resolvedToWalletId || (resolvedToWalletId === 'wallet-binance' && (w.id === 'wallet-binance' || w.id === 'wallet-receiver-2')))) ||
+          w.addressBtc === toAddress ||
+          w.addressTron === toAddress ||
+          w.addressEth === toAddress;
+
+        if (isTarget) {
           const currentBal = w.balances[assetType] || 0;
           return {
             ...w,
@@ -231,8 +286,8 @@ export default function App() {
           };
         }
         return w;
-      })
-    );
+      });
+    });
 
     const sender = wallets.find(w => w.id === fromWalletId) || wallets[0];
     const generatedTxid = generateTxid();
@@ -589,6 +644,7 @@ export default function App() {
               onAddWallet={handleAddWallet}
               transactions={transactions}
               language={language}
+              onQuickMintAsset={handleMintAsset}
               onOpenQr={(address, title) => setQrModal({ isOpen: true, address, title })}
               onNavigateTab={setActiveTab}
             />

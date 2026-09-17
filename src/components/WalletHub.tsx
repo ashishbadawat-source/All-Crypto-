@@ -12,6 +12,7 @@ interface WalletHubProps {
   onAddWallet: (name: string, nameHi: string) => void;
   transactions: Transaction[];
   language: Language;
+  onQuickMintAsset?: (assetType: AssetType, amount: number, targetWalletId: string, validityDays: number, memo?: string) => void;
   onOpenQr: (address: string, title: string) => void;
   onNavigateTab: (tab: string) => void;
 }
@@ -23,6 +24,7 @@ export const WalletHub: React.FC<WalletHubProps> = ({
   onAddWallet,
   transactions,
   language,
+  onQuickMintAsset,
   onOpenQr,
   onNavigateTab
 }) => {
@@ -32,8 +34,18 @@ export const WalletHub: React.FC<WalletHubProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [newWalletName, setNewWalletName] = useState('');
   const [selectedAssetForAddress, setSelectedAssetForAddress] = useState<AssetType>('BTC');
+  const [binanceDepositSuccess, setBinanceDepositSuccess] = useState<string | null>(null);
 
   const selectedWallet = wallets.find(w => w.id === selectedWalletId) || wallets[0];
+  const binanceWallet = wallets.find(w => w.id === 'wallet-binance' || w.id === 'wallet-receiver-2');
+
+  const handleQuickAddBinance = (asset: AssetType, amount: number) => {
+    if (!onQuickMintAsset || !binanceWallet) return;
+    onQuickMintAsset(asset, amount, binanceWallet.id, 300, `Direct Binance Exchange Flash Deposit`);
+    playAudioFeedback('success');
+    setBinanceDepositSuccess(`+${amount} ${asset === 'USDT_TRC20' ? 'USDT' : asset} deposited to Binance!`);
+    setTimeout(() => setBinanceDepositSuccess(null), 3000);
+  };
 
   // Filter transactions for this wallet
   const walletTxs = transactions.filter(
@@ -103,10 +115,94 @@ export const WalletHub: React.FC<WalletHubProps> = ({
         </button>
       </div>
 
+      {/* Binance Exchange Quick Deposit Hub Banner */}
+      <div className="bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-slate-900 border border-yellow-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-yellow-400 text-slate-950 uppercase tracking-wide">
+                BINANCE
+              </span>
+              <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                <span>{language === 'hi' ? 'बाइनेंस एक्सचेंज डिपॉजिट और बैलेंस हब' : 'Binance Exchange Deposit & Balance Hub'}</span>
+                <span className="text-xs text-yellow-400 font-mono">(UID: 894102941 - Verified)</span>
+              </h3>
+            </div>
+            <p className="text-xs text-slate-300">
+              {language === 'hi'
+                ? 'बाइनेंस में डायरेक्ट 300-दिन का फ्लैश क्रिप्टो बैलेंस जोड़ें या 1-क्लिक में ट्रांसफर भेजें।'
+                : 'Instantly add 300-day flash assets to your Binance account or broadcast 1-click test deposits.'}
+            </p>
+          </div>
+
+          {/* 1-Click Fast Binance Deposit Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            {onQuickMintAsset && (
+              <>
+                <button
+                  onClick={() => handleQuickAddBinance('USDT_TRC20', 25000)}
+                  className="px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                  title="Add 25,000 USDT directly to Binance"
+                >
+                  <Plus className="w-3.5 h-3.5 text-yellow-400" />
+                  <span>+25,000 USDT</span>
+                </button>
+
+                <button
+                  onClick={() => handleQuickAddBinance('BTC', 1.0)}
+                  className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                  title="Add 1.0 BTC directly to Binance"
+                >
+                  <Plus className="w-3.5 h-3.5 text-amber-400" />
+                  <span>+1.0 BTC</span>
+                </button>
+
+                <button
+                  onClick={() => handleQuickAddBinance('TRX', 100000)}
+                  className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                  title="Add 100,000 TRX directly to Binance"
+                >
+                  <Plus className="w-3.5 h-3.5 text-red-400" />
+                  <span>+100K TRX</span>
+                </button>
+
+                <button
+                  onClick={() => handleQuickAddBinance('ETH', 5.0)}
+                  className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                  title="Add 5.0 ETH directly to Binance"
+                >
+                  <Plus className="w-3.5 h-3.5 text-purple-400" />
+                  <span>+5.0 ETH</span>
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() => {
+                if (binanceWallet) onSelectWallet(binanceWallet.id);
+                onNavigateTab('transfer');
+              }}
+              className="px-3.5 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-yellow-500/20"
+            >
+              <ArrowUpRight className="w-4 h-4" />
+              <span>{language === 'hi' ? 'बाइनेंस में भेजें' : 'Send to Binance'}</span>
+            </button>
+          </div>
+        </div>
+
+        {binanceDepositSuccess && (
+          <div className="mt-3 p-2 bg-emerald-500/20 border border-emerald-500/40 rounded-lg text-emerald-300 text-xs font-bold flex items-center gap-1.5 animate-fadeIn">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>{binanceDepositSuccess}</span>
+          </div>
+        )}
+      </div>
+
       {/* Wallets Grid List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {wallets.map((w) => {
           const isSelected = w.id === selectedWalletId;
+          const isBinance = w.id === 'wallet-binance' || w.id === 'wallet-receiver-2';
           const totalValUsd =
             (w.balances.BTC * ASSET_CONFIGS.BTC.usdRate) +
             (w.balances.USDT_TRC20 * ASSET_CONFIGS.USDT_TRC20.usdRate) +
@@ -122,30 +218,36 @@ export const WalletHub: React.FC<WalletHubProps> = ({
               }}
               className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 relative overflow-hidden ${
                 isSelected
-                  ? 'bg-slate-900 border-cyan-500/60 ring-2 ring-cyan-500/30 shadow-lg shadow-cyan-500/10'
+                  ? isBinance
+                    ? 'bg-slate-900 border-yellow-400 ring-2 ring-yellow-400/30 shadow-lg shadow-yellow-500/20'
+                    : 'bg-slate-900 border-cyan-500/60 ring-2 ring-cyan-500/30 shadow-lg shadow-cyan-500/10'
+                  : isBinance
+                  ? 'bg-slate-950/90 border-yellow-500/40 hover:border-yellow-400 hover:bg-slate-900/80 shadow-sm'
                   : 'bg-slate-950/70 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
               }`}
             >
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-slate-800 border border-slate-700">
+                  <div className={`p-2 rounded-lg border ${isBinance ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' : 'bg-slate-800 border-slate-700'}`}>
                     {getWalletIcon(w.iconName)}
                   </div>
                   <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                    w.type === 'sender'
+                    isBinance
+                      ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
+                      : w.type === 'sender'
                       ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
                       : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'
                   }`}>
-                    {w.type === 'sender' ? 'SENDER' : 'RECEIVER'}
+                    {isBinance ? 'BINANCE' : w.type === 'sender' ? 'SENDER' : 'RECEIVER'}
                   </span>
                 </div>
                 {isSelected && (
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span className={`w-2 h-2 rounded-full ${isBinance ? 'bg-yellow-400' : 'bg-cyan-400'} animate-pulse`}></span>
                 )}
               </div>
 
-              <h3 className="font-bold text-sm text-white truncate">
-                {language === 'hi' ? w.nameHi : w.name}
+              <h3 className="font-bold text-sm text-white truncate flex items-center gap-1.5">
+                <span>{language === 'hi' ? w.nameHi : w.name}</span>
               </h3>
 
               <div className="mt-3 space-y-1 text-xs">

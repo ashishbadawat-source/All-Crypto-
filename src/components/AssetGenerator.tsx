@@ -265,9 +265,15 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
 
         {/* Step 4: Destination Wallet */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-            3. {t.destinationWallet}
-          </label>
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+              3. {t.destinationWallet}
+            </label>
+            <span className="text-[10px] text-amber-400 font-semibold">
+              {language === 'hi' ? 'बाइनेंस या अन्य वॉलेट चुनें' : 'Choose Binance or Vault'}
+            </span>
+          </div>
+
           <select
             value={targetWalletId}
             onChange={(e) => setTargetWalletId(e.target.value)}
@@ -279,6 +285,35 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
               </option>
             ))}
           </select>
+
+          {/* 1-Click Fast Destination Chips */}
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {wallets.map((w) => {
+              const isBinance = w.id === 'wallet-binance' || w.id === 'wallet-receiver-2';
+              return (
+                <button
+                  key={w.id}
+                  type="button"
+                  onClick={() => {
+                    setTargetWalletId(w.id);
+                    playAudioFeedback('click');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
+                    targetWalletId === w.id
+                      ? isBinance
+                        ? 'bg-yellow-500/20 text-yellow-300 border-yellow-400 shadow-sm'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-400'
+                      : isBinance
+                      ? 'bg-slate-950/80 text-yellow-400/90 border-yellow-500/30 hover:border-yellow-400'
+                      : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isBinance ? 'bg-yellow-400' : 'bg-amber-400'}`}></span>
+                  <span>{isBinance ? (language === 'hi' ? '🟡 बाइनेंस (Binance Vault)' : '🟡 Binance Exchange') : (language === 'hi' ? w.nameHi : w.name)}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Submit Button */}

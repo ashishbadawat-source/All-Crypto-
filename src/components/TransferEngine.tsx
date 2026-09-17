@@ -149,6 +149,29 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
     playAudioFeedback('success');
   };
 
+  // Quick 1-Click Binance Deposit Autofill
+  const handleBinanceFill = () => {
+    const richWallet = wallets.find(w => (w.balances.USDT_TRC20 || 0) > 0 || (w.balances.BTC || 0) > 0) || wallets[0];
+    if (richWallet) setFromWalletId(richWallet.id);
+
+    const binanceW = wallets.find(w => w.id === 'wallet-binance' || w.id === 'wallet-receiver-2') || wallets[1] || wallets[0];
+
+    if (richWallet && (richWallet.balances.USDT_TRC20 || 0) >= 1000) {
+      setAssetType('USDT_TRC20');
+      setAmount('10000');
+      setRecipientAddress(binanceW.addressTron);
+    } else {
+      setAssetType('BTC');
+      setAmount('0.75');
+      setRecipientAddress(binanceW.addressBtc);
+    }
+
+    setTargetReceiverWalletId(binanceW.id);
+    setFeePriority('high');
+    setAddressError(null);
+    playAudioFeedback('success');
+  };
+
   const handleSelectPresetReceiver = (w: Wallet) => {
     setTargetReceiverWalletId(w.id);
     if (assetType === 'BTC') {
@@ -384,16 +407,28 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
           </div>
         </div>
 
-        {/* 1-Click AutoFill Demo Button */}
-        <button
-          id="autofill-demo-btn"
-          type="button"
-          onClick={handleAutofillDemo}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition shadow-sm self-start sm:self-center"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>{language === 'hi' ? '⚡ 1-क्लिक डेमो भरें' : '⚡ 1-Click Demo Fill'}</span>
-        </button>
+        {/* Fast Action Buttons: Binance and Demo Fill */}
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-center">
+          <button
+            id="autofill-binance-btn"
+            type="button"
+            onClick={handleBinanceFill}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black rounded-xl text-xs transition shadow-md shadow-yellow-500/20"
+            title="Auto-fill transfer to Binance Account"
+          >
+            <span>🟡 {language === 'hi' ? 'बाइनेंस में भरें' : 'Fill Binance'}</span>
+          </button>
+
+          <button
+            id="autofill-demo-btn"
+            type="button"
+            onClick={handleAutofillDemo}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>{language === 'hi' ? '⚡ 1-क्लिक डेमो' : '⚡ 1-Click Demo'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Step-by-Step Guide Accordion / Banner */}
@@ -618,21 +653,29 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
               <div className="flex flex-wrap gap-2">
                 {wallets
                   .filter((w) => w.id !== fromWalletId)
-                  .map((w) => (
-                    <button
-                      key={w.id}
-                      type="button"
-                      onClick={() => handleSelectPresetReceiver(w)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
-                        targetReceiverWalletId === w.id
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400'
-                          : 'bg-slate-950/80 text-slate-300 border-slate-800 hover:bg-slate-800 hover:border-slate-700'
-                      }`}
-                    >
-                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                      <span className="font-semibold">{language === 'hi' ? w.nameHi : w.name}</span>
-                    </button>
-                  ))}
+                  .map((w) => {
+                    const isBinance = w.id === 'wallet-binance' || w.id === 'wallet-receiver-2';
+                    const isSelected = targetReceiverWalletId === w.id;
+                    return (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => handleSelectPresetReceiver(w)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
+                          isSelected
+                            ? isBinance
+                              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-400 shadow-sm'
+                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-400'
+                            : isBinance
+                            ? 'bg-slate-950/80 text-yellow-400/90 border-yellow-500/30 hover:border-yellow-400 hover:bg-slate-900'
+                            : 'bg-slate-950/80 text-slate-300 border-slate-800 hover:bg-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isBinance ? 'bg-yellow-400' : 'bg-emerald-400'}`}></span>
+                        <span className="font-semibold">{isBinance ? (language === 'hi' ? '🟡 बाइनेंस खाता (Binance)' : '🟡 Binance Account') : (language === 'hi' ? w.nameHi : w.name)}</span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 

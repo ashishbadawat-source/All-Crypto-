@@ -105,18 +105,18 @@ export const INITIAL_WALLETS: Wallet[] = [
     createdAt: Date.now() - 3600000 * 24 * 1
   },
   {
-    id: 'wallet-receiver-2',
-    name: 'Binance / Exchange Test Deposit',
-    nameHi: 'बाइनेंस / एक्सचेंज टेस्ट डिपॉजिट',
+    id: 'wallet-binance',
+    name: 'Binance Exchange (Spot & Funding Vault)',
+    nameHi: 'बाइनेंस एक्सचेंज खाता (स्पॉट एवं फंडिंग)',
     type: 'receiver',
     addressBtc: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
     addressTron: 'TLyqzVGLV1srkB7dToTAwdg296WC972c9y',
     addressEth: '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
     balances: {
-      BTC: 0,
-      USDT_TRC20: 0,
-      TRX: 0,
-      ETH: 0
+      BTC: 1.50,
+      USDT_TRC20: 35000,
+      TRX: 120000,
+      ETH: 6.5
     },
     color: 'from-yellow-500/20 to-amber-600/20',
     iconName: 'Building2',
