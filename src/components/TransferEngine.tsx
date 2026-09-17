@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, ArrowRightLeft, Bitcoin, DollarSign, Flame, Layers, ShieldCheck, CheckCircle2, Clock, AlertCircle, ExternalLink, Check, Copy } from 'lucide-react';
+import { Send, ArrowRightLeft, Bitcoin, DollarSign, Flame, Layers, ShieldCheck, CheckCircle2, Clock, AlertCircle, ExternalLink, Check, Copy, FileText, Printer } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AssetType, Language, Wallet } from '../types';
 import { ASSET_CONFIGS } from '../data/constants';
@@ -18,7 +18,26 @@ interface TransferEngineProps {
     fee: number,
     toWalletId?: string
   ) => void;
-  onViewReceipt?: (txid: string) => void;
+  onViewReceipt?: (tx: {
+    id: string;
+    txid: string;
+    assetType: AssetType;
+    amount: number;
+    fee: number;
+    feeAsset: string;
+    fromWalletId: string;
+    fromAddress: string;
+    toWalletId?: string;
+    toAddress: string;
+    timestamp: number;
+    status: 'CONFIRMED';
+    confirmations: number;
+    maxConfirmations: number;
+    blockHeight: number;
+    validityDays: number;
+    expiresAt: number;
+    memo?: string;
+  }) => void;
   onNavigateTab: (tab: string) => void;
 }
 
@@ -51,6 +70,8 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
     amount: number;
     assetType: AssetType;
     receiverName?: string;
+    fee: number;
+    expiresAt: number;
   } | null>(null);
 
   const [addressError, setAddressError] = useState<string | null>(null);
@@ -85,7 +106,6 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
   const handleAssetChange = (newAsset: AssetType) => {
     setAssetType(newAsset);
     setAddressError(null);
-    // If a preset wallet is selected, update address to match asset
     if (targetReceiverWalletId) {
       const targetW = wallets.find(w => w.id === targetReceiverWalletId);
       if (targetW) {
@@ -98,145 +118,186 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
   };
 
   const handleMaxAmount = () => {
-    if (senderBalance <= 0) return;
-    setAmount(senderBalance.toString());
-    playAudioFeedback('click');
+    if (senderBalance > 0) {
+      setAmount(senderBalance.toString());
+      playAudioFeedback('click');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const numAmount = parseFloat(amount);
+    setAddressError(null);
 
-    if (isNaN(numAmount) || numAmount <= 0) {
-      alert(language === 'hi' ? 'कृपया सही राशि दर्ज करें' : 'Please enter a valid transfer amount');
+    const numAmount = parseFloat(amount);
+    if (!numAmount || numAmount <= 0) {
+      alert(language === 'hi' ? 'कृपया मान्य मात्रा दर्ज करें' : 'Please enter a valid amount');
       return;
     }
 
     if (numAmount > senderBalance) {
-      alert(language === 'hi' ? 'अपर्याप्त बैलेंस! पहले फ्लैश क्रिप्टो जनरेट करें।' : 'Insufficient balance! Please generate flash crypto first.');
+      alert(
+        language === 'hi'
+          ? `अपर्याप्त बैलेंस! आपके पास केवल ${senderBalance} ${config.symbol} उपलब्ध है।`
+          : `Insufficient balance! You only have ${senderBalance} ${config.symbol}.`
+      );
       return;
     }
 
-    // Validate address
-    const validation = validateAddress(recipientAddress, assetType);
-    if (!validation.isValid) {
-      setAddressError(validation.message || 'Invalid address');
+    if (!recipientAddress.trim()) {
+      setAddressError(language === 'hi' ? 'प्राप्तकर्ता का एड्रेस आवश्यक है' : 'Recipient address is required');
       return;
     }
-    setAddressError(null);
 
-    // Start animated multi-node broadcast
+    const isValid = validateAddress(recipientAddress.trim(), assetType);
+    if (!isValid) {
+      setAddressError(
+        language === 'hi'
+          ? `यह एड्रेस ${config.network} के लिए मान्य प्रारूप में नहीं है।`
+          : `This address is not in a valid format for ${config.network}.`
+      );
+      return;
+    }
+
+    // Begin Simulated Multi-Step Mempool Broadcast
     setIsBroadcasting(true);
     setBroadcastStep(1);
-    setBroadcastLog(language === 'hi' ? '1/4: ट्रांजेक्शन क्रिप्टोग्राफिक रूप से साइन किया जा रहा है...' : '1/4: Cryptographically signing UTXO with private key...');
+    setBroadcastLog(language === 'hi' ? '1/4: ट्रांजेक्शन स्क्रिप्ट और एलिप्टिक कर्व सिग्नेचर साइन हो रहा है...' : '1/4: Generating elliptic curve ECDSA signature...');
     playAudioFeedback('broadcast');
 
     setTimeout(() => {
       setBroadcastStep(2);
-      setBroadcastLog(language === 'hi' ? '2/4: 2,048 पीयर-टू-पीयर नोड्स में ब्रॉडकास्ट हो रहा है...' : '2/4: Broadcasting to 2,048 P2P blockchain nodes...');
-    }, 600);
+      setBroadcastLog(language === 'hi' ? '2/4: P2P नोड्स में मेमपूल ब्रॉडकास्ट हो रहा है...' : '2/4: Broadcasting raw hex transaction into mempool...');
+      playAudioFeedback('click');
 
-    setTimeout(() => {
-      setBroadcastStep(3);
-      setBroadcastLog(language === 'hi' ? '3/4: मेमपूल सत्यापन पूरा — ब्लॉक माइनिंग प्रगति पर...' : '3/4: Mempool verified — Mining in next block...');
-    }, 1300);
+      setTimeout(() => {
+        setBroadcastStep(3);
+        setBroadcastLog(language === 'hi' ? '3/4: माइनर्स द्वारा ब्लॉक में शामिल किया जा रहा है...' : '3/4: Included in next pending block by miners...');
+        playAudioFeedback('click');
 
-    setTimeout(() => {
-      setBroadcastStep(4);
-      setBroadcastLog(language === 'hi' ? '4/4: ब्लॉक कन्फर्मेशन प्राप्त! रिसीवर वॉलेट में फंड ट्रांसफर पूरा हुआ।' : '4/4: Block confirmed! Funds successfully transferred to target wallet.');
+        setTimeout(() => {
+          setBroadcastStep(4);
+          setBroadcastLog(language === 'hi' ? '4/4: कन्फर्मेशन 6/6 पूर्ण! बैलेंस रिसीवर वॉलेट में क्रेडिट हुआ।' : '4/4: Confirmed 6/6! Balances successfully synchronized.');
 
-      // Execute real state transfer
-      const txid = generateTxid();
-      const detectedReceiver = wallets.find(
-        w => w.addressBtc === recipientAddress || w.addressTron === recipientAddress || w.addressEth === recipientAddress
-      );
+          // Trigger state update
+          onSendTransaction(
+            fromWalletId,
+            recipientAddress.trim(),
+            assetType,
+            numAmount,
+            currentFee.low,
+            targetReceiverWalletId || undefined
+          );
 
-      onSendTransaction(
-        fromWalletId,
-        recipientAddress,
-        assetType,
-        numAmount,
-        currentFee,
-        detectedReceiver ? detectedReceiver.id : undefined
-      );
+          const generatedTxid = generateTxid();
+          const targetW = wallets.find(w => w.id === targetReceiverWalletId);
+          const expiresAt = Date.now() + (200 * 86400000);
 
-      setLastTxSuccess({
-        txid,
-        from: senderWallet.name,
-        to: recipientAddress,
-        amount: numAmount,
-        assetType,
-        receiverName: detectedReceiver ? (language === 'hi' ? detectedReceiver.nameHi : detectedReceiver.name) : undefined
-      });
+          setLastTxSuccess({
+            txid: generatedTxid,
+            from: senderWallet.name,
+            to: recipientAddress.trim(),
+            amount: numAmount,
+            assetType,
+            receiverName: targetW ? (language === 'hi' ? targetW.nameHi : targetW.name) : undefined,
+            fee: currentFee.low,
+            expiresAt
+          });
 
-      setIsBroadcasting(false);
-      playAudioFeedback('success');
-      setAmount('');
+          setIsBroadcasting(false);
+          setAmount('');
+          playAudioFeedback('success');
 
-      try {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } catch {
-        // no-op
-      }
-    }, 2100);
+          // Trigger Confetti Celebration
+          confetti({
+            particleCount: 55,
+            spread: 60,
+            origin: { y: 0.6 }
+          });
+
+        }, 800);
+      }, 700);
+    }, 650);
   };
 
   const handleCopyTxid = () => {
-    if (!lastTxSuccess) return;
-    navigator.clipboard.writeText(lastTxSuccess.txid);
-    setCopiedTxid(true);
-    setTimeout(() => setCopiedTxid(false), 2000);
+    if (lastTxSuccess) {
+      navigator.clipboard.writeText(lastTxSuccess.txid);
+      setCopiedTxid(true);
+      playAudioFeedback('click');
+      setTimeout(() => setCopiedTxid(false), 2000);
+    }
+  };
+
+  const handleOpenReceipt = () => {
+    if (lastTxSuccess && onViewReceipt) {
+      onViewReceipt({
+        id: `tx-${Date.now()}`,
+        txid: lastTxSuccess.txid,
+        assetType: lastTxSuccess.assetType,
+        amount: lastTxSuccess.amount,
+        fee: lastTxSuccess.fee,
+        feeAsset: lastTxSuccess.assetType === 'BTC' ? 'BTC' : lastTxSuccess.assetType === 'ETH' ? 'ETH' : 'TRX',
+        fromWalletId: senderWallet.id,
+        fromAddress: senderWallet.addressBtc,
+        toWalletId: targetReceiverWalletId,
+        toAddress: lastTxSuccess.to,
+        timestamp: Date.now(),
+        status: 'CONFIRMED',
+        confirmations: 6,
+        maxConfirmations: 6,
+        blockHeight: 894126,
+        validityDays: 200,
+        expiresAt: lastTxSuccess.expiresAt,
+        memo: 'Simulated Network Transfer'
+      });
+    }
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 max-w-3xl mx-auto shadow-2xl space-y-6">
       
-      {/* Title */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-            <ArrowRightLeft className="w-5 h-5" />
-          </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">
+      {/* Header */}
+      <div className="flex items-center space-x-3 pb-4 border-b border-slate-800">
+        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <ArrowRightLeft className="w-5 h-5" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-white tracking-tight">
             {t.transferTitle}
           </h2>
+          <p className="text-xs text-slate-400">
+            {t.transferSubtitle}
+          </p>
         </div>
-        <p className="text-xs text-slate-400">
-          {t.transferSubtitle}
-        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleFormSubmit} className="space-y-5">
         
-        {/* Step 1: Sender Wallet & Asset */}
+        {/* Step 1: Select Source Wallet & Asset */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
-          {/* Sender Wallet */}
+          {/* Source Wallet */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              {language === 'hi' ? 'सेंडर वॉलेट' : 'Sender Wallet'}
+              {language === 'hi' ? 'भेजने वाला वॉलेट (Source Vault)' : 'Source Vault'}
             </label>
             <select
               value={fromWalletId}
               onChange={(e) => setFromWalletId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 outline-none"
+              className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-xs font-semibold text-white focus:border-emerald-400 outline-none"
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {language === 'hi' ? w.nameHi : w.name} ({w.balances[assetType]} {assetType})
+                  {language === 'hi' ? w.nameHi : w.name} ({w.balances[assetType]} {config.symbol})
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Select Asset */}
+          {/* Asset Selector */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              {t.selectAsset}
+              {language === 'hi' ? 'क्रिप्टो एसेट' : 'Cryptocurrency Asset'}
             </label>
             <div className="grid grid-cols-4 gap-1.5">
               {(['BTC', 'USDT_TRC20', 'TRX', 'ETH'] as AssetType[]).map((type) => (
@@ -320,125 +381,82 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
                 setTargetReceiverWalletId('');
                 setAddressError(null);
               }}
-              placeholder={
-                assetType === 'BTC'
-                  ? 'bc1q... या 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-                  : assetType === 'USDT_TRC20' || assetType === 'TRX'
-                  ? 'TNPwZzZ6V6B8pP3j2mK1n4u7V6y8w0X3j5...'
-                  : '0x71C38283E20F0D8E73B90B5548f71B4eE3B128e4'
-              }
-              className={`w-full rounded-xl bg-slate-950 border px-4 py-2.5 text-xs font-mono text-white placeholder-slate-600 outline-none ${
-                addressError
-                  ? 'border-red-500 focus:border-red-400'
-                  : 'border-slate-700 focus:border-emerald-400'
-              }`}
+              placeholder={assetType === 'BTC' ? 'bc1q...' : assetType === 'USDT_TRC20' || assetType === 'TRX' ? 'TX8r5q...' : '0x71C...'}
+              className={`w-full rounded-xl bg-slate-950 border ${
+                addressError ? 'border-red-500 focus:border-red-400' : 'border-slate-700 focus:border-emerald-400'
+              } px-4 py-2.5 text-xs font-mono text-white placeholder-slate-600 outline-none`}
               required
             />
+
             {addressError && (
-              <p className="text-[11px] text-red-400 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+              <p className="text-xs text-red-400 flex items-center gap-1 font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{addressError}</span>
               </p>
             )}
-          </div>
 
-          {/* Preset Simulated Receiver Wallets Fast Picker */}
-          <div className="mt-3">
-            <span className="text-[10px] uppercase font-semibold text-slate-400 block mb-1.5">
-              {t.orSelectSaved}:
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {wallets.filter(w => w.id !== fromWalletId).map((w) => (
-                <button
-                  key={w.id}
-                  type="button"
-                  onClick={() => handleSelectPresetReceiver(w)}
-                  className={`p-2 rounded-lg border text-left text-xs transition ${
-                    targetReceiverWalletId === w.id
-                      ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="font-semibold truncate">{language === 'hi' ? w.nameHi : w.name}</div>
-                  <div className="text-[10px] font-mono text-slate-400">
-                    {language === 'hi' ? 'बैलेंस:' : 'Bal:'} {w.balances[assetType]} {assetType}
-                  </div>
-                </button>
-              ))}
+            {/* Fast 1-Click Simulated Receiver Presets */}
+            <div className="space-y-1 pt-1">
+              <span className="text-[11px] text-slate-400 font-medium block">
+                {t.orSelectSaved}:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {wallets
+                  .filter((w) => w.id !== fromWalletId)
+                  .map((w) => (
+                    <button
+                      key={w.id}
+                      type="button"
+                      onClick={() => handleSelectPresetReceiver(w)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
+                        targetReceiverWalletId === w.id
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400'
+                          : 'bg-slate-950/60 text-slate-300 border-slate-800 hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span>{language === 'hi' ? w.nameHi : w.name}</span>
+                    </button>
+                  ))}
+              </div>
             </div>
+
           </div>
         </div>
 
-        {/* Step 4: Network Fee Priority */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+        {/* Step 4: Network Priority & Miner Fee */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
             {t.networkFee}
           </label>
           <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setFeePriority('low')}
-              className={`p-2 rounded-lg border text-center transition ${
-                feePriority === 'low'
-                  ? 'bg-slate-800 border-emerald-400 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400'
-              }`}
-            >
-              <div className="text-[11px] font-bold">{language === 'hi' ? 'स्टैंडर्ड' : 'Standard'}</div>
-              <div className="text-[10px] font-mono text-slate-400">{feeValues[assetType].low} {feeValues[assetType].unit}</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFeePriority('med')}
-              className={`p-2 rounded-lg border text-center transition ${
-                feePriority === 'med'
-                  ? 'bg-slate-800 border-emerald-400 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400'
-              }`}
-            >
-              <div className="text-[11px] font-bold">{language === 'hi' ? 'प्रायरिटी' : 'Priority'}</div>
-              <div className="text-[10px] font-mono text-slate-400">{feeValues[assetType].med} {feeValues[assetType].unit}</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFeePriority('high')}
-              className={`p-2 rounded-lg border text-center transition ${
-                feePriority === 'high'
-                  ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-400'
-              }`}
-            >
-              <div className="text-[11px] font-bold text-amber-300">{language === 'hi' ? 'फ्लैश इंस्टेंट' : 'Flash Instant'}</div>
-              <div className="text-[10px] font-mono text-amber-400">{feeValues[assetType].high} {feeValues[assetType].unit}</div>
-            </button>
+            {[
+              { id: 'low', label: t.lowFee, desc: '~10 mins' },
+              { id: 'med', label: t.medFee, desc: '~3 mins' },
+              { id: 'high', label: t.highFee, desc: '~Instant (Flash)' }
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFeePriority(f.id as any)}
+                className={`p-2.5 rounded-xl border text-left transition ${
+                  feePriority === f.id
+                    ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300'
+                    : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800'
+                }`}
+              >
+                <div className="text-xs font-bold">{f.label}</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">{f.desc}</div>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Broadcasting Progress Bar */}
-        {isBroadcasting && (
-          <div className="bg-slate-950 border border-emerald-500/40 rounded-xl p-4 space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-emerald-400 animate-pulse">{broadcastLog}</span>
-              <span className="font-mono text-slate-400">{broadcastStep}/4</span>
-            </div>
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full transition-all duration-300 rounded-full"
-                style={{ width: `${(broadcastStep / 4) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Submit Action */}
+        {/* Submit Broadcast Button */}
         <button
           type="submit"
           disabled={isBroadcasting || senderBalance <= 0}
-          className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm tracking-wide transition-all duration-200 shadow-lg flex items-center justify-center gap-2 ${
-            isBroadcasting || senderBalance <= 0
-              ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 hover:from-emerald-600 hover:to-teal-600 text-slate-950 shadow-emerald-500/20'
-          }`}
+          className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isBroadcasting ? (
             <>
@@ -452,11 +470,31 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
             </>
           )}
         </button>
+
       </form>
 
-      {/* Success Receipt Banner */}
-      {lastTxSuccess && (
-        <div className="bg-emerald-500/10 border border-emerald-500/40 rounded-xl p-4 space-y-3 animate-fadeIn">
+      {/* Broadcast Live Progress Stepper */}
+      {isBroadcasting && (
+        <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3 animate-fadeIn">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-emerald-400 font-mono">BROADCASTING TO MEMPOOL</span>
+            <span className="text-slate-400 font-mono">Step {broadcastStep}/4</span>
+          </div>
+
+          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-emerald-400 h-full transition-all duration-300 rounded-full"
+              style={{ width: `${(broadcastStep / 4) * 100}%` }}
+            ></div>
+          </div>
+
+          <p className="text-xs font-mono text-slate-300">{broadcastLog}</p>
+        </div>
+      )}
+
+      {/* Success Receipt Card */}
+      {lastTxSuccess && !isBroadcasting && (
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-3 animate-fadeIn">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
               <CheckCircle2 className="w-4 h-4" />
@@ -491,18 +529,28 @@ export const TransferEngine: React.FC<TransferEngineProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-2">
+          {/* Quick Action Buttons: View Voucher + Wallets + Explorer */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            <button
+              onClick={handleOpenReceipt}
+              className="py-2.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-500/40"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>{language === 'hi' ? 'रसीद / वाउचर देखें' : 'View Receipt Voucher'}</span>
+            </button>
+
             <button
               onClick={() => onNavigateTab('wallets')}
-              className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition text-center"
+              className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition text-center"
             >
-              {language === 'hi' ? 'रिसीवर वॉलेट बैलेंस चेक करें' : 'View Target Wallet Balance'}
+              {language === 'hi' ? 'रिसीवर वॉलेट बैलेंस' : 'Target Wallet'}
             </button>
+
             <button
               onClick={() => onNavigateTab('explorer')}
-              className="flex-1 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg text-xs font-semibold transition text-center border border-emerald-500/30"
+              className="py-2.5 px-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg text-xs font-semibold transition text-center border border-emerald-500/30"
             >
-              {language === 'hi' ? 'ब्लॉकचेन एक्सप्लोरर में देखें' : 'View on Explorer'}
+              {language === 'hi' ? 'एक्सप्लोरर में देखें' : 'View on Explorer'}
             </button>
           </div>
         </div>

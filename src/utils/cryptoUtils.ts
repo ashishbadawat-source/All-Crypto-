@@ -88,7 +88,7 @@ export function truncateHash(hash: string, start = 8, end = 8): string {
 }
 
 /**
- * Calculate remaining validity in days, hours, minutes
+ * Calculate remaining validity in days, hours, minutes for 300-day cycle
  */
 export function calculateRemainingTime(expiresAt: number, simulatedDaysOffset: number = 0): {
   totalSeconds: number;
@@ -120,8 +120,8 @@ export function calculateRemainingTime(expiresAt: number, simulatedDaysOffset: n
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  // 200 days total in seconds = 200 * 86400
-  const maxSeconds = 200 * 86400;
+  // 300 days total in seconds = 300 * 86400
+  const maxSeconds = 300 * 86400;
   const percentageRemaining = Math.max(0, Math.min(100, (totalSeconds / maxSeconds) * 100));
 
   return {
@@ -202,4 +202,3 @@ export function generateMnemonic(): string {
   }
   return selected.join(' ');
 }
-

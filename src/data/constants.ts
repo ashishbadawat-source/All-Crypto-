@@ -7,7 +7,7 @@ export const ASSET_CONFIGS: Record<AssetType, AssetConfig> = {
     symbol: 'BTC',
     network: 'Bitcoin Mainnet (SegWit)',
     networkBadge: 'BTC Network',
-    usdRate: 94250,
+    usdRate: 94840,
     color: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
@@ -39,7 +39,7 @@ export const ASSET_CONFIGS: Record<AssetType, AssetConfig> = {
     symbol: 'TRX',
     network: 'TRON Mainnet Energy Net',
     networkBadge: 'TRON Native',
-    usdRate: 0.28,
+    usdRate: 0.2845,
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/30',
@@ -55,7 +55,7 @@ export const ASSET_CONFIGS: Record<AssetType, AssetConfig> = {
     symbol: 'ETH',
     network: 'Ethereum Mainnet ERC-20',
     networkBadge: 'ERC-20',
-    usdRate: 3450,
+    usdRate: 3485,
     color: 'text-indigo-400',
     bgColor: 'bg-indigo-500/10',
     borderColor: 'border-indigo-500/30',
@@ -71,16 +71,16 @@ export const INITIAL_WALLETS: Wallet[] = [
   {
     id: 'wallet-main',
     name: 'Primary Flash Generator Vault',
-    nameHi: 'प्राइमरी फ्लैश जनरेटर वॉलेट',
+    nameHi: 'प्राइमरी 300-दिन फ्लैश जनरेटर वॉलेट',
     type: 'sender',
     addressBtc: 'bc1q9v3x0k4u8z5e7p2q8y5m6n4c3v2x1a9z0k4u8z',
     addressTron: 'TX8r5q9Pz2mK1n4u7V6y8w0X3j5k9L2m4n',
     addressEth: '0x71C38283E20F0D8E73B90B5548f71B4eE3B128e4',
     balances: {
-      BTC: 2.50,
-      USDT_TRC20: 50000,
-      TRX: 125000,
-      ETH: 10.0
+      BTC: 3.50,
+      USDT_TRC20: 75000,
+      TRX: 250000,
+      ETH: 15.0
     },
     color: 'from-amber-500/20 to-orange-600/20',
     iconName: 'ShieldCheck',
@@ -147,7 +147,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
     id: 'tx-init-1',
     txid: '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
     assetType: 'BTC',
-    amount: 1.5,
+    amount: 2.0,
     fee: 0.00015,
     feeAsset: 'BTC',
     fromWalletId: 'external-faucet',
@@ -159,15 +159,15 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
     confirmations: 18,
     maxConfirmations: 6,
     blockHeight: 894120,
-    validityDays: 200,
-    expiresAt: Date.now() + 200 * 86400000 - 3600000 * 5,
-    memo: '200-Day Flash Asset Mint Initial Batch'
+    validityDays: 300,
+    expiresAt: Date.now() + 300 * 86400000 - 3600000 * 5,
+    memo: '300-Day Flash Asset Mint Initial Batch'
   },
   {
     id: 'tx-init-2',
     txid: '9f82d1c6a7e54b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c',
     assetType: 'USDT_TRC20',
-    amount: 25000,
+    amount: 50000,
     fee: 14.5,
     feeAsset: 'TRX',
     fromWalletId: 'external-faucet',
@@ -179,9 +179,9 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
     confirmations: 64,
     maxConfirmations: 19,
     blockHeight: 68194021,
-    validityDays: 200,
-    expiresAt: Date.now() + 200 * 86400000 - 3600000 * 3,
-    memo: 'TRC-20 Flash Contract Deployment'
+    validityDays: 300,
+    expiresAt: Date.now() + 300 * 86400000 - 3600000 * 3,
+    memo: 'TRC-20 300-Day Flash Contract Deployment'
   }
 ];
 
@@ -199,4 +199,3 @@ export const DEFAULT_DEMO_USERS = [
     lastLoginAt: Date.now()
   }
 ];
-

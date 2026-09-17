@@ -22,12 +22,12 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
   const t = translations[language];
   const timeData = calculateRemainingTime(initialExpiryTimestamp, simulatedDays);
 
-  const effectiveDaysRemaining = Math.max(0, 200 - simulatedDays);
+  const effectiveDaysRemaining = Math.max(0, 300 - simulatedDays);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     onSetSimulatedDays(val);
-    if (val >= 200) {
+    if (val >= 300) {
       playAudioFeedback('expire');
     } else {
       playAudioFeedback('click');
@@ -36,7 +36,7 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
 
   const handlePresetDays = (days: number) => {
     onSetSimulatedDays(days);
-    if (days >= 200) {
+    if (days >= 300) {
       playAudioFeedback('expire');
     } else {
       playAudioFeedback('click');
@@ -50,15 +50,15 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
     dot: 'bg-emerald-400'
   };
 
-  if (simulatedDays >= 200) {
+  if (simulatedDays >= 300) {
     statusBadge = {
       text: language === 'hi' ? 'समाप्त — क्रिप्टो गायब हो गया' : 'Expired — Assets Pruned',
       color: 'bg-red-500/10 text-red-400 border-red-500/30',
       dot: 'bg-red-400'
     };
-  } else if (simulatedDays >= 185) {
+  } else if (simulatedDays >= 280) {
     statusBadge = {
-      text: language === 'hi' ? 'शीघ्र समाप्त (15 दिन से कम)' : 'Expiring Soon (< 15 Days)',
+      text: language === 'hi' ? 'शीघ्र समाप्त (20 दिन से कम)' : 'Expiring Soon (< 20 Days)',
       color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
       dot: 'bg-amber-400'
     };
@@ -88,7 +88,7 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
         </p>
       </div>
 
-      {/* Main 200-Day Timeline Visualizer */}
+      {/* Main 300-Day Timeline Visualizer */}
       <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-5 space-y-6">
         
         {/* Timeline Header with big numbers */}
@@ -98,8 +98,8 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
             <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
               {language === 'hi' ? 'कुल निर्धारित वैलिडिटी' : 'Total Fixed Validity'}
             </span>
-            <span className="text-2xl font-mono font-extrabold text-amber-400">200 {language === 'hi' ? 'दिन' : 'Days'}</span>
-            <span className="text-[11px] text-slate-500 block mt-0.5 font-mono">17,280,000 Seconds</span>
+            <span className="text-2xl font-mono font-extrabold text-amber-400">300 {language === 'hi' ? 'दिन' : 'Days'}</span>
+            <span className="text-[11px] text-slate-500 block mt-0.5 font-mono">25,920,000 Seconds</span>
           </div>
 
           <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
@@ -110,7 +110,7 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
               Day {simulatedDays}
             </span>
             <span className="text-[11px] text-slate-500 block mt-0.5 font-mono">
-              {((simulatedDays / 200) * 100).toFixed(1)}% of lifecycle
+              {((simulatedDays / 300) * 100).toFixed(1)}% of lifecycle
             </span>
           </div>
 
@@ -138,22 +138,22 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
         <div className="space-y-2">
           <div className="flex justify-between text-xs font-mono text-slate-400">
             <span>Day 0 (Minted)</span>
-            <span>Day 50</span>
-            <span>Day 100 (Half-Life)</span>
-            <span>Day 150</span>
-            <span className="text-red-400 font-bold">Day 200 (Auto-Burn)</span>
+            <span>Day 75</span>
+            <span>Day 150 (Half-Life)</span>
+            <span>Day 225</span>
+            <span className="text-red-400 font-bold">Day 300 (Auto-Burn)</span>
           </div>
 
           <div className="relative w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
             <div
               className={`h-full transition-all duration-300 ${
-                simulatedDays >= 200
+                simulatedDays >= 300
                   ? 'bg-red-500'
-                  : simulatedDays >= 185
+                  : simulatedDays >= 280
                   ? 'bg-amber-500'
                   : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400'
               }`}
-              style={{ width: `${Math.min(100, (simulatedDays / 200) * 100)}%` }}
+              style={{ width: `${Math.min(100, (simulatedDays / 300) * 100)}%` }}
             />
           </div>
 
@@ -172,14 +172,14 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
               <span>{t.timeTravelSlider}</span>
             </label>
             <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/30">
-              {language === 'hi' ? 'दिन' : 'Day'}: {simulatedDays} / 200
+              {language === 'hi' ? 'दिन' : 'Day'}: {simulatedDays} / 300
             </span>
           </div>
 
           <input
             type="range"
             min="0"
-            max="205"
+            max="305"
             value={simulatedDays}
             onChange={handleSliderChange}
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
@@ -201,54 +201,54 @@ export const ValidityLifecycleViewer: React.FC<ValidityLifecycleViewerProps> = (
               Day 0 (Fresh)
             </button>
             <button
-              onClick={() => handlePresetDays(50)}
+              onClick={() => handlePresetDays(75)}
               className={`px-2.5 py-1 rounded text-xs font-mono transition ${
-                simulatedDays === 50
+                simulatedDays === 75
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400'
                   : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
               }`}
             >
-              Day 50
+              Day 75
             </button>
             <button
-              onClick={() => handlePresetDays(100)}
+              onClick={() => handlePresetDays(150)}
               className={`px-2.5 py-1 rounded text-xs font-mono transition ${
-                simulatedDays === 100
+                simulatedDays === 150
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-400'
                   : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
               }`}
             >
-              Day 100 (50%)
+              Day 150 (50%)
             </button>
             <button
-              onClick={() => handlePresetDays(195)}
+              onClick={() => handlePresetDays(285)}
               className={`px-2.5 py-1 rounded text-xs font-mono transition ${
-                simulatedDays === 195
+                simulatedDays === 285
                   ? 'bg-amber-500/20 text-amber-300 border border-amber-400'
                   : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
               }`}
             >
-              Day 195 (Warning)
+              Day 285 (Warning)
             </button>
             <button
-              onClick={() => handlePresetDays(200)}
+              onClick={() => handlePresetDays(300)}
               className={`px-2.5 py-1 rounded text-xs font-mono transition ${
-                simulatedDays === 200
+                simulatedDays === 300
                   ? 'bg-red-500/20 text-red-300 border border-red-400'
                   : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
               }`}
             >
-              Day 200 (Expired)
+              Day 300 (Expired)
             </button>
             <button
-              onClick={() => handlePresetDays(205)}
+              onClick={() => handlePresetDays(305)}
               className={`px-2.5 py-1 rounded text-xs font-mono transition ${
-                simulatedDays === 205
+                simulatedDays === 305
                   ? 'bg-red-500/20 text-red-300 border border-red-400'
                   : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
               }`}
             >
-              Day 205+ (Disappeared)
+              Day 305+ (Disappeared)
             </button>
           </div>
 

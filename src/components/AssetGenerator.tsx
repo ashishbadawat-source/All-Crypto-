@@ -28,8 +28,8 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
   const t = translations[language];
 
   const [assetType, setAssetType] = useState<AssetType>('BTC');
-  const [amount, setAmount] = useState<string>('2.5');
-  const [validityDays] = useState<number>(200); // 200 Days per user specification
+  const [amount, setAmount] = useState<string>('3.5');
+  const [validityDays] = useState<number>(300); // 300 Days per updated user specification
   const [targetWalletId, setTargetWalletId] = useState<string>(selectedWalletId || wallets[0]?.id || 'wallet-main');
   const [isMinting, setIsMinting] = useState(false);
   const [lastMintedData, setLastMintedData] = useState<{
@@ -44,18 +44,18 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
   const config = ASSET_CONFIGS[assetType];
 
   const presets: Record<AssetType, number[]> = {
-    BTC: [0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
-    USDT_TRC20: [1000, 5000, 20000, 50000, 100000],
-    TRX: [5000, 25000, 100000, 500000],
-    ETH: [1.0, 2.5, 5.0, 10.0, 25.0]
+    BTC: [0.5, 1.0, 2.5, 3.5, 5.0, 10.0],
+    USDT_TRC20: [5000, 25000, 50000, 75000, 100000],
+    TRX: [25000, 100000, 250000, 500000],
+    ETH: [2.5, 5.0, 10.0, 15.0, 25.0]
   };
 
   const handleAssetSelect = (type: AssetType) => {
     setAssetType(type);
-    if (type === 'BTC') setAmount('2.5');
-    else if (type === 'USDT_TRC20') setAmount('25000');
-    else if (type === 'TRX') setAmount('100000');
-    else if (type === 'ETH') setAmount('5.0');
+    if (type === 'BTC') setAmount('3.5');
+    else if (type === 'USDT_TRC20') setAmount('75000');
+    else if (type === 'TRX') setAmount('250000');
+    else if (type === 'ETH') setAmount('15.0');
     playAudioFeedback('click');
   };
 
@@ -68,7 +68,7 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
     playAudioFeedback('broadcast');
 
     setTimeout(() => {
-      onMintAsset(assetType, numAmount, targetWalletId, validityDays, `200-Day Flash ${assetType} Mint Batch`);
+      onMintAsset(assetType, numAmount, targetWalletId, validityDays, `300-Day Flash ${assetType} Mint Batch`);
       
       const targetWallet = wallets.find(w => w.id === targetWalletId);
       const targetAddress = assetType === 'BTC' ? targetWallet?.addressBtc : (assetType === 'USDT_TRC20' || assetType === 'TRX') ? targetWallet?.addressTron : targetWallet?.addressEth;
@@ -245,13 +245,13 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
           </div>
         </div>
 
-        {/* Step 3: 200-Day Validity Locked Spec */}
+        {/* Step 3: 300-Day Validity Locked Spec */}
         <div className="bg-slate-950/80 border border-amber-500/20 rounded-xl p-3.5 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" />
               <span className="text-xs font-bold text-amber-300">
-                {t.validityPeriod}: 200 Days (Locked)
+                {t.validityPeriod}: 300 Days (Locked)
               </span>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
@@ -320,7 +320,7 @@ export const AssetGenerator: React.FC<AssetGeneratorProps> = ({
             </div>
             <div>
               <span className="text-slate-500 text-[10px] block">VALIDITY DURATION</span>
-              <span className="text-amber-300 font-bold">200 Days (TTL Active)</span>
+              <span className="text-amber-300 font-bold">300 Days (TTL Active)</span>
             </div>
             <div className="sm:col-span-2">
               <span className="text-slate-500 text-[10px] block">TRANSACTION HASH (TXID)</span>
