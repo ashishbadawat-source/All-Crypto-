@@ -264,6 +264,13 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
       {/* Quick Action Navigation Buttons */}
       <div className="flex items-center gap-3 overflow-x-auto pb-1">
         <button
+          onClick={() => onNavigateTab('binance')}
+          className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black rounded-xl text-xs shadow-md shadow-yellow-500/20 transition whitespace-nowrap"
+        >
+          <span>🟡 {language === 'hi' ? 'बाइनेंस हब' : 'Binance Hub'}</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+        <button
           onClick={() => onNavigateTab('generator')}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold rounded-xl text-xs shadow-md transition whitespace-nowrap"
         >

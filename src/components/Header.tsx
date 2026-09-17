@@ -14,6 +14,8 @@ interface HeaderProps {
   onOpenProfile: () => void;
   connectedWeb3Wallet: string | null;
   onOpenWeb3Connect: () => void;
+  onOpenBinance?: () => void;
+  binanceBalanceUsd?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,7 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenProfile,
   connectedWeb3Wallet,
-  onOpenWeb3Connect
+  onOpenWeb3Connect,
+  onOpenBinance,
+  binanceBalanceUsd
 }) => {
   const t = translations[language];
 
@@ -57,9 +61,24 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Live Network, Web3, User & Controls */}
+        {/* Live Network, Web3, Binance, User & Controls */}
         <div className="flex items-center flex-wrap gap-2 sm:gap-2.5">
           
+          {/* Binance Direct Button in Header */}
+          {onOpenBinance && (
+            <button
+              id="header-binance-btn"
+              onClick={onOpenBinance}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-400/15 hover:bg-yellow-400/25 text-yellow-300 border border-yellow-400/40 shadow-sm transition"
+              title="Open Binance Exchange & Wallet Hub"
+            >
+              <span className="px-1.5 py-0.2 bg-yellow-400 text-slate-950 rounded text-[9px] font-black">BINANCE</span>
+              <span className="font-mono text-[11px]">
+                ${(binanceBalanceUsd || 89500).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+              </span>
+            </button>
+          )}
+
           {/* Node sync badge */}
           <div className="hidden xl:flex items-center gap-2 px-2.5 py-1.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs">
             <Activity className="w-3.5 h-3.5 text-emerald-400" />

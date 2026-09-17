@@ -30,6 +30,7 @@ import { AssetGenerator } from './components/AssetGenerator';
 import { TransferEngine } from './components/TransferEngine';
 import { ValidityLifecycleViewer } from './components/ValidityLifecycleViewer';
 import { WalletHub } from './components/WalletHub';
+import { BinanceWalletHub } from './components/BinanceWalletHub';
 import { BlockchainExplorer } from './components/BlockchainExplorer';
 import { EducationalInsight } from './components/EducationalInsight';
 import { QrCodeModal } from './components/QrCodeModal';
@@ -436,6 +437,14 @@ export default function App() {
     playAudioFeedback('click');
   };
 
+  const binanceWallet = effectiveWallets.find(w => w.id === 'wallet-binance' || w.id === 'wallet-receiver-2');
+  const binanceBalanceUsd = binanceWallet
+    ? (binanceWallet.balances.BTC * ASSET_CONFIGS.BTC.usdRate) +
+      (binanceWallet.balances.USDT_TRC20 * ASSET_CONFIGS.USDT_TRC20.usdRate) +
+      (binanceWallet.balances.TRX * ASSET_CONFIGS.TRX.usdRate) +
+      (binanceWallet.balances.ETH * ASSET_CONFIGS.ETH.usdRate)
+    : 89500;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
       
@@ -462,6 +471,11 @@ export default function App() {
         onOpenProfile={() => setIsProfileModalOpen(true)}
         connectedWeb3Wallet={connectedWeb3Wallet}
         onOpenWeb3Connect={() => setIsWeb3ModalOpen(true)}
+        onOpenBinance={() => {
+          setActiveTab('binance');
+          playAudioFeedback('click');
+        }}
+        binanceBalanceUsd={binanceBalanceUsd}
       />
 
       {/* Main Container */}
@@ -549,6 +563,19 @@ export default function App() {
           >
             <WalletIcon className="w-4 h-4 text-cyan-400" />
             <span>{t.tabWallets}</span>
+          </button>
+
+          <button
+            id="tab-binance-btn"
+            onClick={() => { setActiveTab('binance'); playAudioFeedback('click'); }}
+            className={`flex items-center gap-2 px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap ${
+              activeTab === 'binance'
+                ? 'border-yellow-400 text-yellow-300 bg-yellow-500/10'
+                : 'border-transparent text-yellow-400/90 hover:text-yellow-300 hover:border-yellow-500/50'
+            }`}
+          >
+            <span className="px-1.5 py-0.2 bg-yellow-400 text-slate-950 rounded text-[9px] font-black">BINANCE</span>
+            <span>{language === 'hi' ? '🟡 बाइनेंस हब' : '🟡 Binance Hub'}</span>
           </button>
 
           <button
@@ -645,6 +672,20 @@ export default function App() {
               transactions={transactions}
               language={language}
               onQuickMintAsset={handleMintAsset}
+              onOpenQr={(address, title) => setQrModal({ isOpen: true, address, title })}
+              onNavigateTab={setActiveTab}
+            />
+          )}
+
+          {activeTab === 'binance' && (
+            <BinanceWalletHub
+              wallets={effectiveWallets}
+              selectedWalletId={selectedWalletId}
+              onSelectWallet={setSelectedWalletId}
+              transactions={transactions}
+              language={language}
+              onQuickMintAsset={handleMintAsset}
+              onSendTransaction={handleSendTransaction}
               onOpenQr={(address, title) => setQrModal({ isOpen: true, address, title })}
               onNavigateTab={setActiveTab}
             />

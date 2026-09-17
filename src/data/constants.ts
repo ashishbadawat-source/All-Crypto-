@@ -139,6 +139,42 @@ export const INITIAL_WALLETS: Wallet[] = [
     color: 'from-purple-500/20 to-indigo-600/20',
     iconName: 'HardDrive',
     createdAt: Date.now() - 3600000 * 6
+  },
+  {
+    id: 'wallet-metamask',
+    name: 'MetaMask (Web3 Multi-Chain)',
+    nameHi: 'मेटामास्क (वेब3 मल्टी-चेन)',
+    type: 'receiver',
+    addressBtc: 'bc1qp72c3v4u8z5e7p2q8y5m6n4c3v2x1a9z0k4u8z',
+    addressTron: 'TDzR3v2mK1n4u7V6y8w0X3j5k9L2m4nP9s',
+    addressEth: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    balances: {
+      BTC: 0.50,
+      USDT_TRC20: 10000,
+      TRX: 45000,
+      ETH: 2.5
+    },
+    color: 'from-orange-500/20 to-amber-600/20',
+    iconName: 'Smartphone',
+    createdAt: Date.now() - 3600000 * 8
+  },
+  {
+    id: 'wallet-tronlink',
+    name: 'TronLink Pro (TRC-20 Hub)',
+    nameHi: 'ट्रॉनलिंक प्रो (TRC-20 हब)',
+    type: 'receiver',
+    addressBtc: 'bc1q5v8w0x3j5k9l2m4n7p2q8y5m6n4c3v2x1a9z',
+    addressTron: 'TXfV2mK1n4u7V6y8w0X3j5k9L2m4n9sWWc',
+    addressEth: '0x53d284357ec70cE289D6D64134DfAc8E511c8a3D',
+    balances: {
+      BTC: 0,
+      USDT_TRC20: 20000,
+      TRX: 85000,
+      ETH: 0
+    },
+    color: 'from-red-500/20 to-rose-600/20',
+    iconName: 'Smartphone',
+    createdAt: Date.now() - 3600000 * 4
   }
 ];
 
