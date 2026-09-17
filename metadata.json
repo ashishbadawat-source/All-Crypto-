@@ -1,0 +1,6 @@
+{
+  "name": "Flash Crypto & 200-Day Wallet Simulator",
+  "description": "Flash Bitcoin, USDT (TRC-20) and TRON generator with 200-day validity lifecycle, multi-wallet simulated transfers, mempool broadcaster, and blockchain explorer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
